@@ -510,7 +510,7 @@ void *platform_init(struct audio_device *adev)
     audio_extn_usb_init(adev);
 
     /* Read one time ssr property */
-    audio_extn_ssr_update_enabled(adev);
+    audio_extn_ssr_update_enabled();
     audio_extn_spkr_prot_init(adev);
     return my_data;
 }
