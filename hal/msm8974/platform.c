@@ -58,6 +58,12 @@
 #define AUDIO_PARAMETER_KEY_FLUENCE_TYPE  "fluence"
 #define AUDIO_PARAMETER_KEY_BTSCO         "bt_samplerate"
 #define AUDIO_PARAMETER_KEY_SLOWTALK      "st_enable"
+#define AUDIO_PARAMETER_KEY_VOLUME_BOOST  "volume_boost"
+
+enum {
+	VOICE_FEATURE_SET_DEFAULT,
+	VOICE_FEATURE_SET_VOLUME_BOOST
+};
 
 struct audio_block_header
 {
@@ -496,6 +502,7 @@ void *platform_init(struct audio_device *adev)
         }
     }
 
+    my_data->voice_feature_set = VOICE_FEATURE_SET_DEFAULT;
     my_data->acdb_handle = dlopen(LIB_ACDB_LOADER, RTLD_NOW);
     if (my_data->acdb_handle == NULL) {
         ALOGE("%s: DLOPEN failed for %s", __func__, LIB_ACDB_LOADER);
@@ -503,13 +510,28 @@ void *platform_init(struct audio_device *adev)
         ALOGV("%s: DLOPEN successful for %s", __func__, LIB_ACDB_LOADER);
         my_data->acdb_deallocate = (acdb_deallocate_t)dlsym(my_data->acdb_handle,
                                                     "acdb_loader_deallocate_ACDB");
+        if (!my_data->acdb_deallocate)
+            ALOGE("%s: Could not find the symbol acdb_loader_deallocate_ACDB from %s",
+                  __func__, LIB_ACDB_LOADER);
+
         my_data->acdb_send_audio_cal = (acdb_send_audio_cal_t)dlsym(my_data->acdb_handle,
                                                     "acdb_loader_send_audio_cal");
         if (!my_data->acdb_send_audio_cal)
-            ALOGW("%s: Could not find the symbol acdb_send_audio_cal from %s",
+            ALOGE("%s: Could not find the symbol acdb_send_audio_cal from %s",
                   __func__, LIB_ACDB_LOADER);
+
         my_data->acdb_send_voice_cal = (acdb_send_voice_cal_t)dlsym(my_data->acdb_handle,
                                                     "acdb_loader_send_voice_cal");
+        if (!my_data->acdb_send_voice_cal)
+            ALOGE("%s: Could not find the symbol acdb_loader_send_voice_cal from %s",
+                  __func__, LIB_ACDB_LOADER);
+
+        my_data->acdb_reload_vocvoltable = (acdb_reload_vocvoltable_t)dlsym(my_data->acdb_handle,
+                                                    "acdb_loader_reload_vocvoltable");
+        if (!my_data->acdb_reload_vocvoltable)
+            ALOGE("%s: Could not find the symbol acdb_loader_reload_vocvoltable from %s",
+                  __func__, LIB_ACDB_LOADER);
+
         my_data->acdb_init = (acdb_init_t)dlsym(my_data->acdb_handle,
                                                     "acdb_loader_init_ACDB");
         if (my_data->acdb_init == NULL)
@@ -1338,6 +1360,24 @@ int platform_set_parameters(void *platform, struct str_parms *parms)
             ALOGE("%s: Failed to set slow talk err: %d", __func__, ret);
     }
 
+    ret = str_parms_get_str(parms, AUDIO_PARAMETER_KEY_VOLUME_BOOST,
+                            value, sizeof(value));
+    if (ret >= 0) {
+        str_parms_del(parms, AUDIO_PARAMETER_KEY_VOLUME_BOOST);
+
+        if (my_data->acdb_reload_vocvoltable == NULL) {
+            ALOGE("%s: acdb_reload_vocvoltable is NULL", __func__);
+        } else if (!strcmp(value, "on")) {
+            if (!my_data->acdb_reload_vocvoltable(VOICE_FEATURE_SET_VOLUME_BOOST)) {
+                my_data->voice_feature_set = 1;
+            }
+        } else {
+            if (!my_data->acdb_reload_vocvoltable(VOICE_FEATURE_SET_DEFAULT)) {
+                my_data->voice_feature_set = 0;
+            }
+        }
+    }
+
     ALOGV("%s: exit with code(%d)", __func__, ret);
     return ret;
 }
@@ -1458,6 +1498,18 @@ void platform_get_parameters(void *platform,
     if (ret >= 0) {
         str_parms_add_str(reply, AUDIO_PARAMETER_KEY_SLOWTALK,
                           my_data->slowtalk?"true":"false");
+    }
+
+    ret = str_parms_get_str(query, AUDIO_PARAMETER_KEY_VOLUME_BOOST,
+                            value, sizeof(value));
+    if (ret >= 0) {
+        if (my_data->voice_feature_set == VOICE_FEATURE_SET_VOLUME_BOOST) {
+            strlcpy(value, "on", sizeof(value));
+        } else {
+            strlcpy(value, "off", sizeof(value));
+        }
+
+        str_parms_add_str(reply, AUDIO_PARAMETER_KEY_VOLUME_BOOST, value);
     }
 
     ALOGV("%s: exit: returns - %s", __func__, str_parms_to_str(reply));
