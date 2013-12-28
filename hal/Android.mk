@@ -137,10 +137,12 @@ LOCAL_C_INCLUDES += \
 	$(LOCAL_PATH)/audio_extn \
 	$(LOCAL_PATH)/voice_extn
 
+ifneq ($(QC_PROP_ROOT),)
 ifeq ($(strip $(AUDIO_FEATURE_ENABLED_LISTEN)),true)
     LOCAL_CFLAGS += -DAUDIO_LISTEN_ENABLED
     LOCAL_C_INCLUDES += $(TARGET_OUT_HEADERS)/mm-audio/audio-listen
     LOCAL_SRC_FILES += audio_extn/listen.c
+endif
 endif
 
 ifeq ($(strip $(AUDIO_FEATURE_ENABLED_AUXPCM_BT)),true)
