@@ -82,7 +82,6 @@ ifneq ($(strip $(AUDIO_FEATURE_DISABLED_COMPRESS_VOIP)),true)
     LOCAL_CFLAGS += -DCOMPRESS_VOIP_ENABLED
     LOCAL_SRC_FILES += voice_extn/compress_voip.c
 endif
-endif
 
 ifneq ($(strip, $(AUDIO_FEATURE_DISABLED_SPKR_PROTECTION)),true)
 ifneq ($(filter msm8974,$(TARGET_BOARD_PLATFORM)),)
@@ -135,7 +134,8 @@ LOCAL_C_INCLUDES += \
 	$(call include-path-for, audio-effects) \
 	$(LOCAL_PATH)/$(AUDIO_PLATFORM) \
 	$(LOCAL_PATH)/audio_extn \
-	$(LOCAL_PATH)/voice_extn
+	$(LOCAL_PATH)/voice_extn \
+	$(LOCAL_PATH)/vendor-platform
 
 ifneq ($(QC_PROP_ROOT),)
 ifeq ($(strip $(AUDIO_FEATURE_ENABLED_LISTEN)),true)
