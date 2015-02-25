@@ -3859,6 +3859,12 @@ status_t AudioHardware::AudioStreamOutMSM8x60::getRenderPosition(uint32_t *dspFr
     return INVALID_OPERATION;
 }
 
+status_t AudioHardware::AudioStreamOutMSM8x60::getPresentationPosition(uint64_t *frames, struct timespec *timestamp)
+{
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
 #ifdef QCOM_VOIP_ENABLED
 // ----------------------------------------------------------------------------
 // Audio Stream from DirectOutput thread
@@ -4204,6 +4210,12 @@ String8 AudioHardware::AudioStreamOutDirect::getParameters(const String8& keys)
 }
 
 status_t AudioHardware::AudioStreamOutDirect::getRenderPosition(uint32_t *dspFrames)
+{
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
+status_t AudioHardware::AudioStreamOutDirect::getPresentationPosition(uint64_t *frames, struct timespec *timestamp)
 {
     //TODO: enable when supported by driver
     return INVALID_OPERATION;
@@ -5019,6 +5031,12 @@ status_t AudioHardware::AudioSessionOutLPA::getRenderPosition(uint32_t *dspFrame
     return INVALID_OPERATION;
 }
 
+status_t AudioHardware::AudioSessionOutLPA::getPresentationPosition(uint64_t *frames, struct timespec *timestamp)
+{
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
 status_t AudioHardware::AudioSessionOutLPA::getBufferInfo(buf_info **buf) {
 
     buf_info *tempbuf = (buf_info *)malloc(sizeof(buf_info) + mInputBufferCount*sizeof(int *));
@@ -5810,6 +5828,12 @@ void AudioHardware::AudioSessionOutTunnel::reset()
 }
 
 status_t AudioHardware::AudioSessionOutTunnel::getRenderPosition(uint32_t *dspFrames)
+{
+    //TODO: enable when supported by driver
+    return INVALID_OPERATION;
+}
+
+status_t AudioHardware::AudioSessionOutTunnel::getPresentationPosition(uint64_t *frames, struct timespec *timestamp)
 {
     //TODO: enable when supported by driver
     return INVALID_OPERATION;
