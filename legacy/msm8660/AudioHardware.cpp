@@ -6419,6 +6419,5 @@ AudioHardware::AudioStreamInMSM8x60 *AudioHardware::getActiveInput_l()
 }
 extern "C" AudioHardwareInterface* createAudioHardware(void) {
     return new AudioHardware();
-}
 
 }; // namespace android_audio_legacy
